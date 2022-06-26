@@ -1,61 +1,76 @@
 <?php
 
+namespace App\Entity;
+
+use App\Repository\CustomerRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-/**
- * @ORM\Table(name="customer")
- * @ORM\Entity()
- */
+#[ORM\Entity(repositoryClass: CustomerRepository::class)]
+class Customer
+{
+    #[ORM\Id]
+    #[ORM\Column(type: 'string', length: 255,name:'socialSecurityNumber')]
+    private $socialSecurityNumber;
 
- class Customer
- {
-    /** @Column(type="string") */
+    #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private $name;
 
-    /** @Id @Column(type="string") */
-    private $socialNumber;
+    #[ORM\Column(type: 'string', length: 255)]
+    private $address;
 
-    /**
-     * @OneToMany(targetEntity="BankAccount", mappedBy="customerSocialNumber", cascade={"ALL"}, indexBy="accountNumbr")
-     */
-    private $bankAccounts;
+    #[ORM\OneToMany(targetEntity:"BankAccount",mappedBy:"customer",indexBy:"accountNumber")]
+    private $accountNumbers;
 
-    public function addBankAccount($accountNumber, $accountName,$accountType,$currency)
+    public function __construct()
     {
-        $this->bankAccounts[$accountNumber] = new BankAccount($accountNumber, $accountName, $accountType,$currency,$this);
+        $this->accountNumbers = new ArrayCollection();
     }
 
-    public function __construct($name, $socialNumber)
+    public function getAccountNumbers(): Collection
     {
-        $this->name = $name;
-        $this->socialNumber = $socialNumber;
+        return $this->accountNumbers;
     }
 
-    
-    public function getName()
+    public function addAccountNumber($accountNumber, $accountType,$accountName,$currency)
+    {
+        $this->accountNumbers[$accountNumber] = new BankAccount($accountNumber, $accountType,$accountName,$currency, $this);
+    }
+
+    public function getName(): ?string
     {
         return $this->name;
     }
 
-    public function setname(?string $name)
+    public function setName(?string $name): self
     {
         $this->name = $name;
+
+        return $this;
     }
 
-    
-    public function getSocialNumber()
+    public function getSocialSecurityNumber(): ?string
     {
-        return $this->socialNumber;
+        return $this->socialSecurityNumber;
     }
 
-   
-    public function setSocialNumber(?string $socialNumber)
+    public function setSocialSecurityNumber(string $socialSecurityNumber): self
     {
-        $this->socialNumber = $socialNumber;
+        $this->socialSecurityNumber = $socialSecurityNumber;
+
+        return $this;
     }
 
-    
- }
+    public function getAddress(): ?string
+    {
+        return $this->address;
+    }
 
+    public function setAddress(string $address): self
+    {
+        $this->address = $address;
 
-?>
+        return $this;
+    }
+}
